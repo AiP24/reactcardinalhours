@@ -23,4 +23,23 @@ export namespace APITypes {
     last_signed_in: number;
     total_time: number;
   };
+
+  export type PublicAPIUser = Pick<APIUser, "first_name" | "last_name" | "total_time"> & { id: string };
+
+  export type AmendSessionBody = {
+    start_time: number;
+    end_time: number;
+  };
+
+  export type ModifyExistingSessionBody = {
+    session_pk: string;
+    start_time: number;
+    end_time: number;
+  };
+
+  export type DeleteExistingSessionBody = {
+    session_pk: string;
+  };
+
+  export type GetAllUsersResponse = PublicAPIUser[];
 }

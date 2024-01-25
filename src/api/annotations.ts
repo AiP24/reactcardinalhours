@@ -1,14 +1,3 @@
-export function AuthRequired(
-  target: any,
-  descriptor: ClassMethodDecoratorContext
-) {}
+export function AuthRequired(constructor: any, name: string, descriptor: TypedPropertyDescriptor<any>) {}
 
-export function GetRequest(
-  target: any,
-  descriptor: ClassMethodDecoratorContext
-) {}
-
-export function PostRequest(
-  target: any,
-  descriptor: ClassMethodDecoratorContext
-) {}
+export function PasswordRequired(constructor: any, name: string, descriptor: TypedPropertyDescriptor<any>) {}

@@ -1,24 +1,11 @@
-import {
-  Button,
-  Checkbox,
-  FormControlLabel,
-  FormGroup,
-  Paper,
-  TextField,
-  Typography,
-} from "@mui/material";
-import React, {
-  ChangeEvent,
-  FocusEvent,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import { Button, Checkbox, FormControlLabel, FormGroup, Paper, TextField, Typography } from "@mui/material";
+import React, { ChangeEvent, FocusEvent, useContext, useEffect, useState } from "react";
 import AdminDialog from "./Notifications/AdminDialog";
 import CustomTextField from "./CustomTextField";
 import { AdminDialogContext } from "./Right";
 import DataAccess from "../api/DataAccess";
-import { APIProvider } from "../api/APIProvider";
+import { APIProvider, RestException } from "../api/APIProvider";
+import { AuthError } from "../api/AuthProvider";
 
 const styles = {
   container: {
@@ -62,46 +49,34 @@ const SettingsBox = (props: SettingsBoxProps): JSX.Element => {
   const [dialogIsOpen, setDialogIsOpen] = useContext(AdminDialogContext);
   const [adminPasswordText, setAdminPasswordText] = useState<string>("berdies");
 
-  const checkBox: JSX.Element = (
-    <Checkbox
-      style={{ color: "#ff073a" }}
-      onChange={(
-        event: ChangeEvent<HTMLInputElement>,
-        checked: boolean
-      ): void => setIsShowAdminPass(checked)}
-    />
-  );
-  const handleOnFocus = (event: FocusEvent<HTMLInputElement>): void =>
-    setIsFocused(true);
+  const checkBox: JSX.Element = <Checkbox style={{ color: "#ff073a" }} onChange={(event: ChangeEvent<HTMLInputElement>, checked: boolean): void => setIsShowAdminPass(checked)} />;
+  const handleOnFocus = (event: FocusEvent<HTMLInputElement>): void => setIsFocused(true);
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     if (isFocused) setCurrentKey(event.key);
   };
-  const handleOnBlur = (event: FocusEvent<HTMLInputElement>): void =>
-    setIsFocused(false);
+  const handleOnBlur = (event: FocusEvent<HTMLInputElement>): void => setIsFocused(false);
 
   const closeDialog = (password: string): void => {
-    APIProvider.isPasswordCorrect(password).then((valid) => {
-      if (!valid) return props.handleSnackbarOpen("Invalid password");
-      setDialogIsOpen(false);
-    });
+    APIProvider.getInstance()
+      .authenticate(password)
+      .then(() => setDialogIsOpen(false))
+      .catch((err: RestException | AuthError) => {
+        if (err instanceof AuthError) props.handleSnackbarOpen("Invalid password");
+        else if (err.response.status == 401) props.handleSnackbarOpen("Please provide a password");
+        else props.handleSnackbarOpen("Something went wrong; try again later!");
+      });
   };
 
   const handleChangeSettings = (): void => {
-    if (dialogIsOpen)
-      return props.handleSnackbarOpen("Please enter the admin password");
-    if (
-      !adminPasswordText.trim() ||
-      adminPasswordText !== localStorage.getItem("adminPassword")
-    )
-      localStorage.set("adminPassword", localStorage.getItem("adminPassword"));
+    if (dialogIsOpen) return props.handleSnackbarOpen("Please enter the admin password");
+    if (!adminPasswordText.trim() || adminPasswordText !== localStorage.getItem("adminPassword")) localStorage.set("adminPassword", localStorage.getItem("adminPassword"));
     localStorage.setItem("submitKey", currentKey);
     localStorage.setItem("adminPassword", adminPasswordText);
     props.handleSnackbarOpen("Settings have been changed");
   };
 
   const syncUsers = async (): Promise<void> => {
-    if (dialogIsOpen)
-      return props.handleSnackbarOpen("Please enter the admin password");
+    if (dialogIsOpen) return props.handleSnackbarOpen("Please enter the admin password");
 
     const res = await DataAccess.getInstance().syncUsers();
 
@@ -127,32 +102,15 @@ const SettingsBox = (props: SettingsBoxProps): JSX.Element => {
         sx={styles.textField}
         InputProps={{ readOnly: true }}
       />
-      <CustomTextField
-        onChange={(event: ChangeEvent<HTMLInputElement>) =>
-          setAdminPasswordText(event.currentTarget.value)
-        }
-        sx={styles.textField}
-        type={isShowAdminPass ? "password" : "text"}
-        label="Change Admin Password WIP"
-      />
+      <CustomTextField onChange={(event: ChangeEvent<HTMLInputElement>) => setAdminPasswordText(event.currentTarget.value)} sx={styles.textField} type={isShowAdminPass ? "password" : "text"} label="Change Admin Password WIP" />
       <FormGroup sx={styles.checkBox}>
         <FormControlLabel label="Show Password" control={checkBox} />
       </FormGroup>
-      <Button
-        onClick={handleChangeSettings}
-        sx={styles.button}
-        variant="contained"
-        size="large"
-      >
+      <Button onClick={handleChangeSettings} sx={styles.button} variant="contained" size="large">
         <Typography>Submit</Typography>
       </Button>
       <br></br>
-      <Button
-        onClick={syncUsers}
-        sx={styles.button}
-        variant="contained"
-        size="large"
-      >
+      <Button onClick={syncUsers} sx={styles.button} variant="contained" size="large">
         <Typography>Sync Users</Typography>
       </Button>
       <AdminDialog closeDialog={closeDialog} isOpen={dialogIsOpen} />

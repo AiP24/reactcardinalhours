@@ -1,5 +1,3 @@
-import { AuthRequired, PostRequest } from "./annotations";
-
 export namespace Routes {
   export const DOMAIN = "https://hours.team4159.org" as const;
 
@@ -45,5 +43,33 @@ export namespace Routes {
 
   export function getDailyReport(dayId: string): string {
     return DOMAIN + "/admin/report/daily/" + dayId;
+  }
+
+  export function signInUser(): string {
+    return DOMAIN + "/users/sign-in";
+  }
+
+  export function signOutUser(): string {
+    return DOMAIN + "/users/sign-out";
+  }
+
+  export function amendUserSession(): string {
+    return DOMAIN + "/users/session";
+  }
+
+  export function updateUserSession(): string {
+    return DOMAIN + "/users/session";
+  }
+
+  export function deleteUserSession(): string {
+    return DOMAIN + "/users/session";
+  }
+
+  export function getAllUsers(): string {
+    return DOMAIN + "/users";
+  }
+
+  export function getUser(userId: string): string {
+    return DOMAIN + "/users/" + userId;
   }
 }

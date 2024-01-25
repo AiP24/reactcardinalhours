@@ -1,4 +1,11 @@
-import { APIProvider } from "./APIProvider";
+import { APIProvider, RestException } from "./APIProvider";
+
+export class AuthError extends Error {
+  constructor(msg: string) {
+    super(`[AuthError] : ${msg}`);
+    this.name = "AuthError";
+  }
+}
 
 export default class AuthProvider {
   private static instance?: AuthProvider = undefined;
@@ -35,12 +42,5 @@ export default class AuthProvider {
     this.token = resp.token;
     this.expires = resp.expires;
     return this;
-  }
-}
-
-export class AuthError extends Error {
-  constructor(msg: string) {
-    super(`[AuthError] : ${msg}`);
-    this.name = "AuthError";
   }
 }

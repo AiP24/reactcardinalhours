@@ -3,7 +3,17 @@
 import { APITypes } from "./APITypes";
 import AuthProvider, { AuthError } from "./AuthProvider";
 import { Routes } from "./Routes";
-import { AuthRequired } from "./annotations";
+import { AuthRequired, PasswordRequired } from "./annotations";
+
+export class RestException extends Error {
+  response: Response;
+
+  constructor(msg: string, response: Response) {
+    super(`[RestException] : ${msg}`);
+    this.name = "RestException";
+    this.response = response;
+  }
+}
 
 export class APIProvider {
   private authProvider?: AuthProvider = undefined;
@@ -48,7 +58,8 @@ export class APIProvider {
         expires: data.exp,
         token: auth!,
       };
-    } else throw new AuthError("Bad password!");
+    } else if (response.status == 403) throw new AuthError("Invalid password!");
+    else throw new RestException(`${Routes.auth()} failed with ${response.status} - ${await response.text()}`, response);
   }
 
   @AuthRequired
@@ -60,7 +71,7 @@ export class APIProvider {
         method: "POST",
       })
     );
-    if (!response.ok) throw new RestException(`${Routes.sync()} failed with ${response.status}`);
+    if (!response.ok) throw new RestException(`${Routes.sync()} failed with ${response.status} - ${await response.text()}`, response);
   }
 
   @AuthRequired
@@ -73,7 +84,7 @@ export class APIProvider {
       })
     );
 
-    if (!response.ok) throw new RestException(`${Routes.getConfig()} failed with ${response.status}`);
+    if (!response.ok) throw new RestException(`${Routes.getConfig()} failed with ${response.status} - ${await response.text()}`, response);
     else {
       return await response.json();
     }
@@ -89,7 +100,7 @@ export class APIProvider {
         body: JSON.stringify(updates),
       })
     );
-    if (!response.ok) throw new RestException(`${Routes.updateConfig()} failed with ${response.status}`);
+    if (!response.ok) throw new RestException(`${Routes.updateConfig()} failed with ${response.status} - ${await response.text()}`, response);
   }
 
   @AuthRequired
@@ -102,7 +113,7 @@ export class APIProvider {
         body: JSON.stringify(user),
       })
     );
-    if (!response.ok) throw new RestException(`${Routes.createUser()} failed with ${response.status}`);
+    if (!response.ok) throw new RestException(`${Routes.createUser()} failed with ${response.status} - ${await response.text()}`, response);
   }
 
   @AuthRequired
@@ -115,7 +126,7 @@ export class APIProvider {
         body: JSON.stringify(users),
       })
     );
-    if (!response.ok) throw new RestException(`${Routes.createUserBulk()} failed with ${response.status}`);
+    if (!response.ok) throw new RestException(`${Routes.createUserBulk()} failed with ${response.status} - ${await response.text()}`, response);
   }
 
   @AuthRequired
@@ -128,7 +139,7 @@ export class APIProvider {
         body: JSON.stringify(user),
       })
     );
-    if (!response.ok) throw new RestException(`${Routes.deleteUser()} failed with ${response.status}`);
+    if (!response.ok) throw new RestException(`${Routes.deleteUser()} failed with ${response.status} - ${await response.text()}`, response);
   }
 
   @AuthRequired
@@ -141,10 +152,74 @@ export class APIProvider {
         body: JSON.stringify(users),
       })
     );
-    if (!response.ok) throw new RestException(`${Routes.deleteUserBulk()} failed with ${response.status}`);
+    if (!response.ok) throw new RestException(`${Routes.deleteUserBulk()} failed with ${response.status} - ${await response.text()}`, response);
   }
 
-  // impl all report methods, public & login/out methods
+  // TODO: impl all report methods, public & login/out methods
+
+  @PasswordRequired
+  public async signInUser(password: string): Promise<string> {
+    const response = await fetch(Routes.signInUser(), {
+      method: "POST",
+      body: JSON.stringify({ password }),
+    });
+    if (!response.ok) throw new RestException(`${Routes.signInUser()} failed with ${response.status} - ${await response.text()}`, response);
+    return (await response.json()).description;
+  }
+
+  @PasswordRequired
+  public async signOutUser(password: string): Promise<string> {
+    const response = await fetch(Routes.signOutUser(), {
+      method: "POST",
+      body: JSON.stringify({ password }),
+    });
+    if (!response.ok) throw new RestException(`${Routes.signOutUser()} failed with ${response.status} - ${await response.text()}`, response);
+    return (await response.json()).description;
+  }
+
+  @PasswordRequired
+  public async amendUserSession(password: string, body: APITypes.AmendSessionBody): Promise<void | never> {
+    const response = await fetch(Routes.amendUserSession(), {
+      method: "POST",
+      body: JSON.stringify({ password, ...body }),
+    });
+    if (!response.ok) throw new RestException(`${Routes.amendUserSession()} failed with ${response.status} - ${await response.text()}`, response);
+  }
+
+  @PasswordRequired
+  public async updateUserSession(password: string, body: Partial<APITypes.ModifyExistingSessionBody> & { session_pk: string }): Promise<void | never> {
+    const response = await fetch(Routes.updateUserSession(), {
+      method: "PATCH",
+      body: JSON.stringify({ password, ...body }),
+    });
+    if (!response.ok) throw new RestException(`${Routes.updateUserSession()} failed with ${response.status} - ${await response.text()}`, response);
+  }
+
+  @PasswordRequired
+  public async deleteUserSession(password: string, body: Partial<APITypes.DeleteExistingSessionBody>): Promise<void | never> {
+    const response = await fetch(Routes.deleteUserSession(), {
+      method: "DELETE",
+      body: JSON.stringify({ password, ...body }),
+    });
+    if (!response.ok) throw new RestException(`${Routes.deleteUserSession()} failed with ${response.status} - ${await response.text()}`, response);
+  }
+
+  public async getAllUsers(): Promise<APITypes.GetAllUsersResponse | never> {
+    const response = await fetch(Routes.getAllUsers(), {
+      method: "GET",
+    });
+    if (!response.ok) throw new RestException(`${Routes.getAllUsers()} failed with ${response.status} - ${await response.text()}`, response);
+    return await response.json();
+  }
+
+  public async getUser(userId: string): Promise<APITypes.PublicAPIUser> {
+    const response = await fetch(Routes.getUser(userId), {
+      method: "GET",
+    });
+    if (!response.ok) throw new RestException(`${Routes.getUser(userId)} failed with ${response.status} - ${await response.text()}`, response);
+
+    return await response.json();
+  }
 }
 
 export class HeaderAccessorClass {
@@ -195,12 +270,5 @@ export class HeaderAccessorClass {
         delete object[key];
       }
     }
-  }
-}
-
-export class RestException extends Error {
-  constructor(msg: string) {
-    super(`[RestException] : ${msg}`);
-    this.name = "RestException";
   }
 }
