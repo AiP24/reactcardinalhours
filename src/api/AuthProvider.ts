@@ -31,19 +31,10 @@ export default class AuthProvider {
   }
 
   public async authenticate(password: string): Promise<AuthProvider | never> {
-    const response = await fetch(APIProvider.DOMAIN + "/admin/auth", {
-      method: "POST",
-      body: JSON.stringify({
-        password,
-      }),
-    });
-    if (response.status == 200) {
-      const data: OKAuthResponse = await response.json(),
-        auth = response.headers.get("Authorization");
-      this.token = auth!;
-      this.expires = data.exp;
-      return this;
-    } else throw new AuthError("Bad password!");
+    const resp = await APIProvider.getInstance().authenticate(password);
+    this.token = resp.token;
+    this.expires = resp.expires;
+    return this;
   }
 }
 
@@ -53,9 +44,3 @@ export class AuthError extends Error {
     this.name = "AuthError";
   }
 }
-
-type OKAuthResponse = {
-  iss: string;
-  sub: string;
-  exp: number; // in UNIX secs?
-};
