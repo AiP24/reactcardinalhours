@@ -74,10 +74,6 @@ class DataAccess {
 
     }
 
-    public delete(password:string):void{
-
-    }
-
     public async signIn(password:string, name:string, openSnackbar: (msg:string) => void = () =>{}):Promise<number | void> {
         try {
             const res = await fetch(

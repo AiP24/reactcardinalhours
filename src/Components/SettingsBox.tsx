@@ -1,9 +1,9 @@
 import { Button, Checkbox, FormControlLabel, FormGroup, Paper, Typography } from '@mui/material'
 import React, { ChangeEvent, FocusEvent, useContext, useState } from 'react'
-import AdminDialog from './Notifications/AdminDialog'
+import AdminDialog from './AdminDialog'
 import CustomTextField from './CustomTextField'
 import { AdminDialogContext } from './Right'
-import DataAccess from "../DataAccess"
+import DataAccess from "../utils/DataAccess"
 
 const styles = {
     container: {

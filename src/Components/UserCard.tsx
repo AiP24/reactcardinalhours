@@ -1,7 +1,7 @@
 import { Typography } from "@mui/material"
 import { Box } from "@mui/system"
 import { Dispatch, SetStateAction, useContext, useEffect, useState } from "react"
-import DataAccess from "../DataAccess"
+import DataAccess from "../utils/DataAccess"
 import { UsersContext } from "./DesktopComponent"
 
 type UserCardProps = {
@@ -39,12 +39,9 @@ const styles = {
 const UserCard = (props:UserCardProps):JSX.Element => {
     const [displayedTime, setDisplayedTime]: [number, Dispatch<SetStateAction<number>>] = useState(0)
     const {name, timeIn, totalTime, signedIn} = props
-    
-    const [users, setUsers, socket] = useContext(UsersContext)
+    const [, setUsers, socket] = useContext(UsersContext)
 
-    //
     useEffect(():any => {
-        //console.log(displayedTime)
         socket?.addEventListener('message', (event:MessageEvent):void => {
             if(event.data === "Sign in update" || event.data === "Sign out update"  ){
                 DataAccess.getInstance().getAll().then(users => setUsers(users))
@@ -60,13 +57,13 @@ const UserCard = (props:UserCardProps):JSX.Element => {
             })
             
         }
-    }, [])
+    }, [setUsers, socket])
 
     useEffect(():void => {
         if(signedIn === 0) setDisplayedTime(0)
-        //Without this line, the total time only updates on sign in
+        // Without this line, the total time only updates on sign in
         if(signedIn === 0) DataAccess.getInstance().getAll().then(users => setUsers(users))
-    }, [signedIn])
+    }, [signedIn, setUsers])
 
     //It might be better to do this in the parent node with foreach, but I am lazy
     useEffect(() => {
@@ -77,7 +74,6 @@ const UserCard = (props:UserCardProps):JSX.Element => {
         }, 1000)
         return ():void => clearInterval(interval)
     }, [displayedTime, signedIn])
-
 
     const formatTime = (timeInSec:number):string => {
         let secondsLeft = timeInSec % 3600 % 60;
@@ -100,4 +96,5 @@ const UserCard = (props:UserCardProps):JSX.Element => {
         </Box>
     )
 }
+
 export default UserCard

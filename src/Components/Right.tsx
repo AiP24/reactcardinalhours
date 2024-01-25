@@ -5,7 +5,7 @@ import SignInBox from "./SignInBox";
 import {TabContext, TabList, TabPanel} from "@mui/lab";
 import RegisterBox from "./RegisterBox";
 import SettingsBox from "./SettingsBox";
-import AddSessionBox2 from "./AddSessionBox2";
+import AddSessionBox2 from "./AddSessionBox";
 
 const styles = {
     container: {
@@ -50,12 +50,12 @@ const Right = ():JSX.Element => {
     }
     const handleSnackbarClose = ():void => setSnackbarIsOpen(false)
     
-
     useEffect(():void => {
         if(!(parseInt(currentTab) === 2 || parseInt(currentTab) === 3 )) return
         setDialogIsOpen(true)
         
     }, [currentTab])
+
     return (
         <Box sx={styles.container}>
             <Typography sx={styles.title}>Team4159 Sign In</Typography>
@@ -89,8 +89,8 @@ const Right = ():JSX.Element => {
                 autoHideDuration={1000} 
                 message={snackbarMsg}
             />
-        </Box>
-        
+        </Box> 
     )
 }
+
 export default Right;

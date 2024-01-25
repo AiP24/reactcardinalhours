@@ -1,10 +1,10 @@
 import { LoadingButton } from '@mui/lab'
 import { Paper, Typography } from '@mui/material'
 import { ChangeEvent, useContext, useState } from 'react'
-import DataAccess from '../DataAccess'
+import DataAccess from '../utils/DataAccess'
 import CustomTextField from './CustomTextField'
 import { UsersContext } from './DesktopComponent'
-import AdminDialog from './Notifications/AdminDialog'
+import AdminDialog from './AdminDialog'
 import { AdminDialogContext } from './Right'
 
 const styles = {
@@ -35,15 +35,17 @@ const styles = {
         },
      },
 }
+
 type RegisterBoxProps = {
     handleSnackbarOpen: (msg:string) => void;
 }
+
 const RegisterBox = (props:RegisterBoxProps):JSX.Element => {
     const [firstName, setFirstName] = useState<string>("")
     const [lastName, setLastName] = useState<string>("")
     const [password, setPassword] = useState<string>("")
     const [dialogIsOpen, setDialogIsOpen] = useContext(AdminDialogContext)
-    const [user, setUsers] = useContext(UsersContext)
+    const [, setUsers] = useContext(UsersContext)
     
     const closeDialog = (password:string):void => {
         if(password !== "Berdies" /*|| password !==localStorage.getItem("adminPassword")*/){

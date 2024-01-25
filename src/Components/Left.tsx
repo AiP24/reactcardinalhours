@@ -4,7 +4,7 @@ import { useContext, useEffect, useState } from "react"
 import { UsersContext } from "./DesktopComponent"
 import Searchbar from "./Searchbar"
 import UserCard from "./UserCard"
-type LeftProps = {}
+
 type User = { 
     name: string; 
     signedIn: number; 
@@ -27,13 +27,15 @@ const styles = {
         padding:"1rem 0 1rem 0"
     }
 } 
-const Left = (props:LeftProps):JSX.Element => {
+
+const Left = ():JSX.Element => {
     const getDate = ():string => {
         const date:Date = new Date()
         return `${date.getMonth()+1}/${date.getDate()}/${date.getFullYear()}`
     }
+    
     const [date, setDate] = useState<string>();
-    const [users, setUsers] = useContext(UsersContext)
+    const [users, ] = useContext(UsersContext)
     const [searchBarInput, setSearchBarInput] = useState<string>("")
 
     useEffect(():void => {

@@ -1,11 +1,9 @@
-import './App.css';
+import './css/App.css';
 import { Component } from 'react';
-import DesktopComponent from './Components/DesktopComponent';
-type AppProps = {
+import DesktopComponent from './components/DesktopComponent';
 
-}
- class App extends Component {
-  constructor(props:AppProps){
+class App extends Component {
+  constructor(props: any){
     super(props)
     this.state = {
 

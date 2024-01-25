@@ -1,6 +1,6 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from "@mui/material"
+import { Button, Dialog, DialogActions, DialogTitle, Typography } from "@mui/material"
 import { ChangeEvent, Fragment, useState } from "react"
-import CustomTextField from "../CustomTextField"
+import CustomTextField from "./CustomTextField"
 
 const styles = {
     dialog: {
@@ -31,10 +31,12 @@ const styles = {
         padding:".5em 0 1em 0"
     }
 }
+
 type AdminDialogProps = {
     isOpen:boolean;
     closeDialog:(password:string) => void
 }
+
 const AdminDialog = (props:AdminDialogProps):JSX.Element => {
     const [passwordText, setPasswordText] = useState<string>("")
     return (

@@ -2,9 +2,35 @@ import React, { ChangeEvent, useState } from 'react'
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import DateTimePicker from 'react-datetime-picker'
-import { Box } from '@mui/material';
+import { Box, Typography } from '@mui/material';
+import { LoadingButton } from '@mui/lab';
+import CustomTextField from './CustomTextField';
 
-//Copy and pasted from add_session_touch_up
+const mStyles = {
+    container: {
+        display:"flex",
+        flexDirection:"column",
+        backgroundColor:"whitesmoke",
+        padding:"3em 4em 3em 4em",
+        transform:"translate(0,20%)",
+        borderRadius:"10px",
+       boxShadow: "0 0 5px 5px #0f0c08",
+    },
+    button: {
+        backgroundColor:"#ff073a",
+        color:"whitesmoke",
+        '&:hover': {
+            background: 'rgba(255,7,58,0.9)',
+        },
+        marginTop:"2em"
+    },
+    text: {
+        color:"#595959",
+        fontWeight:"bold",
+        textAlign:"center"
+    }
+}
+
 toast.configure()
 function AddSessionBox() {
     const [startTime, setStartTime] = useState<any>(new Date());
@@ -45,8 +71,6 @@ function AddSessionBox() {
             return;
         }
 
-        let utcStartTime = startTime.toUTCString();
-        let utcEndTime = endTime.toUTCString();
         fetch('https://hours.team4159.org/users/addsession', {
             method: 'POST',
             headers: {
@@ -82,26 +106,28 @@ function AddSessionBox() {
     }
 
     return (
-        <Box>
+        <Box sx={mStyles.container}>
             <div className={"add-session-container"}>
-            <div>Add Session:</div>
-            <input type={"password"} className={"input"} value={passwordValue} onChange={handleUserInput} onKeyPress={handleUserKeypress} />
+            <Typography sx={mStyles.text}>Add Session:</Typography>
+            <CustomTextField label="Password" type={"password"} className={"input"} value={passwordValue} onChange={handleUserInput} onKeyPress={handleUserKeypress} />
             <div className={"time-text"}>Start Time: </div>
             <DateTimePicker
                 className={"date-time-picker"}
                 onChange={setStartTime}
                 value={startTime}          />
             <div className={"time-text"}>End Time: </div>
-            <DateTimePicker
-                className={"date-time-picker"}
-                onChange={setEndTime}
-                value={endTime}
-            />
-            <button className={"buttons"} onClick={() => { handleAddSession(passwordValue, startTime, endTime) }}>Add Session</button>
+            <Box sx={{display:"flex", flexDirection:"column"}}>
+                <DateTimePicker
+                    className={"date-time-picker"}
+                    onChange={setEndTime}
+                    value={endTime}
+                />
+                <LoadingButton sx={mStyles.button} className={"buttons"} onClick={() => { handleAddSession(passwordValue, startTime, endTime) }}>Add Session</LoadingButton>
+            </Box>
             </div>
         </Box>
     )
-}
 
-//This HOC breaks the app for some reason(path issues)
-export default /*withStyles(styles)*/(AddSessionBox)
+} 
+
+export default AddSessionBox
