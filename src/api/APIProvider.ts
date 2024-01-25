@@ -155,7 +155,7 @@ export class APIProvider {
     if (!response.ok) throw new RestException(`${Routes.deleteUserBulk()} failed with ${response.status} - ${await response.text()}`, response);
   }
 
-  // TODO: impl all report methods, public & login/out methods
+  // TODO: impl all report methods
 
   @PasswordRequired
   public async signInUser(password: string): Promise<string> {
