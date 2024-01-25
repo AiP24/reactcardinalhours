@@ -1,14 +1,8 @@
 import { Typography } from "@mui/material";
 import { Box } from "@mui/system";
-import {
-  Dispatch,
-  SetStateAction,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
-import DataAccess from "../api/DataAccess";
+import { Dispatch, SetStateAction, useContext, useEffect, useState } from "react";
 import { UsersContext } from "./DesktopComponent";
+import { APIProvider } from "../api/APIProvider";
 
 type UserCardProps = {
   name: string;
@@ -46,10 +40,7 @@ const styles = {
   },
 };
 const UserCard = (props: UserCardProps): JSX.Element => {
-  const [displayedTime, setDisplayedTime]: [
-    number,
-    Dispatch<SetStateAction<number>>
-  ] = useState(0);
+  const [displayedTime, setDisplayedTime]: [number, Dispatch<SetStateAction<number>>] = useState(0);
   const { name, timeIn, totalTime, signedIn } = props;
 
   const [users, setUsers, socket] = useContext(UsersContext);
@@ -59,21 +50,14 @@ const UserCard = (props: UserCardProps): JSX.Element => {
     //console.log(displayedTime)
     socket?.addEventListener("message", (event: MessageEvent): void => {
       if (event.data === "Sign in update" || event.data === "Sign out update") {
-        DataAccess.getInstance()
-          .getAll()
-          .then((users) => setUsers(users));
+        APIProvider.getInstance().getAllUsers().then(setUsers);
         setDisplayedTime(0);
       }
     });
     return () => {
       socket?.removeEventListener("message", (event: MessageEvent): void => {
-        if (
-          event.data === "Sign in update" ||
-          event.data === "Sign out update"
-        ) {
-          DataAccess.getInstance()
-            .getAll()
-            .then((users) => setUsers(users));
+        if (event.data === "Sign in update" || event.data === "Sign out update") {
+          APIProvider.getInstance().getAllUsers().then(setUsers);
           setDisplayedTime(0);
         }
       });
@@ -83,10 +67,7 @@ const UserCard = (props: UserCardProps): JSX.Element => {
   useEffect((): void => {
     if (signedIn === 0) setDisplayedTime(0);
     //Without this line, the total time only updates on sign in
-    if (signedIn === 0)
-      DataAccess.getInstance()
-        .getAll()
-        .then((users) => setUsers(users));
+    if (signedIn === 0) APIProvider.getInstance().getAllUsers().then(setUsers);
   }, [signedIn]);
 
   //It might be better to do this in the parent node with foreach, but I am lazy
@@ -112,19 +93,12 @@ const UserCard = (props: UserCardProps): JSX.Element => {
   return (
     <Box sx={styles.container}>
       <Typography sx={styles.name}>{name}</Typography>
-      <Typography
-        sx={styles.signedInText}
-        color={signedIn === 1 ? "lime" : "#ff073a"}
-      >
+      <Typography sx={styles.signedInText} color={signedIn === 1 ? "lime" : "#ff073a"}>
         {signedIn ? "SIGNED IN" : "SIGNED OUT"}
       </Typography>
       <Box sx={styles.timeContainer}>
-        <Typography sx={styles.timeText}>
-          Time In: {formatTime(timeIn / 1000 + displayedTime)}{" "}
-        </Typography>
-        <Typography sx={styles.timeText}>
-          Total Time: {formatTime(totalTime / 1000)}
-        </Typography>
+        <Typography sx={styles.timeText}>Time In: {formatTime(timeIn / 1000 + displayedTime)} </Typography>
+        <Typography sx={styles.timeText}>Total Time: {formatTime(totalTime / 1000)}</Typography>
       </Box>
     </Box>
   );

@@ -3,8 +3,6 @@ import logo from "./logo.svg";
 import "./App.css";
 import { Component } from "react";
 import DesktopComponent from "./Components/DesktopComponent";
-import DataAccess from "./api/DataAccess";
-import MobileComponent from "./Components/Mobile/MobileComponent";
 type AppProps = {};
 class App extends Component {
   constructor(props: AppProps) {
@@ -12,15 +10,7 @@ class App extends Component {
     this.state = {};
   }
   getMobile(): boolean {
-    const platforms = [
-      /Android/i,
-      /webOS/i,
-      /iPhone/i,
-      /iPad/i,
-      /iPod/i,
-      /BlackBerry/i,
-      /Windows Phone/i,
-    ];
+    const platforms = [/Android/i, /webOS/i, /iPhone/i, /iPad/i, /iPod/i, /BlackBerry/i, /Windows Phone/i];
     return platforms.some((platform) => {
       return navigator.userAgent.match(platform);
     });

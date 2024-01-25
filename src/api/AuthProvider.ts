@@ -43,4 +43,11 @@ export default class AuthProvider {
     this.expires = resp.expires;
     return this;
   }
+
+  public logout(): void | never {
+    if (this.isAuthenticated()) {
+      this.token = undefined;
+      this.expires = undefined;
+    }
+  }
 }

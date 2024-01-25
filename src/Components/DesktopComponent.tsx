@@ -1,10 +1,10 @@
 import { Box } from "@mui/system";
 import { Component, Context, createContext } from "react";
-import DataAccess from "../api/DataAccess";
 import Left from "./Left";
 import Right from "./Right";
 import "../App.css";
 import { Socket } from "dgram";
+import { APIProvider } from "../api/APIProvider";
 
 const styles = {
   container: {
@@ -19,10 +19,7 @@ type DesktopComponentState = {
   users: any[] | Promise<any[]>;
   socket?: WebSocket;
 };
-class DesktopComponent extends Component<
-  DesktopComponentProps,
-  DesktopComponentState
-> {
+class DesktopComponent extends Component<DesktopComponentProps, DesktopComponentState> {
   constructor(props: DesktopComponentProps) {
     super(props);
     this.state = {
@@ -34,37 +31,24 @@ class DesktopComponent extends Component<
   setUsers = (users: any[]): void => this.setState({ users: users });
 
   componentDidMount(): void {
-    DataAccess.getInstance()
-      .getAll()
-      .then((usersPromise) => this.setUsers(usersPromise));
+    APIProvider.getInstance().getAllUsers().then(this.setUsers);
   }
 
   componentWillUnmount(): void {
     this.state.socket?.removeEventListener("open", (event: Event): void => {
       console.log("Opened connection ");
     });
-    this.state.socket?.addEventListener(
-      "message",
-      (event: MessageEvent): void => {
-        if (event.data === "Sign in update" || event.data === "Sign out update")
-          DataAccess.getInstance()
-            .getAll()
-            .then((users) => this.setUsers(users));
-      }
-    );
+    this.state.socket?.addEventListener("message", (event: MessageEvent): void => {
+      if (event.data === "Sign in update" || event.data === "Sign out update") APIProvider.getInstance().getAllUsers().then(this.setUsers);
+    });
   }
 
-  componentDidUpdate(
-    _: DesktopComponentProps,
-    prevState: DesktopComponentState
-  ): void {}
+  componentDidUpdate(_: DesktopComponentProps, prevState: DesktopComponentState): void {}
 
   render() {
     return (
       <Box sx={styles.container}>
-        <UsersContext.Provider
-          value={[this.state.users, this.setUsers, this.state.socket]}
-        >
+        <UsersContext.Provider value={[this.state.users, this.setUsers, this.state.socket]}>
           <Left />
           <Right />
         </UsersContext.Provider>

@@ -3,9 +3,8 @@ import React, { ChangeEvent, FocusEvent, useContext, useEffect, useState } from 
 import AdminDialog from "./Notifications/AdminDialog";
 import CustomTextField from "./CustomTextField";
 import { AdminDialogContext } from "./Right";
-import DataAccess from "../api/DataAccess";
 import { APIProvider, RestException } from "../api/APIProvider";
-import { AuthError } from "../api/AuthProvider";
+import AuthProvider, { AuthError } from "../api/AuthProvider";
 
 const styles = {
   container: {
@@ -57,7 +56,8 @@ const SettingsBox = (props: SettingsBoxProps): JSX.Element => {
   const handleOnBlur = (event: FocusEvent<HTMLInputElement>): void => setIsFocused(false);
 
   const closeDialog = (password: string): void => {
-    APIProvider.getInstance()
+    const auth = AuthProvider.getInstance();
+    auth
       .authenticate(password)
       .then(() => setDialogIsOpen(false))
       .catch((err: RestException | AuthError) => {
@@ -78,11 +78,8 @@ const SettingsBox = (props: SettingsBoxProps): JSX.Element => {
   const syncUsers = async (): Promise<void> => {
     if (dialogIsOpen) return props.handleSnackbarOpen("Please enter the admin password");
 
-    const res = await DataAccess.getInstance().syncUsers();
-
-    if (res === 200) {
-      props.handleSnackbarOpen("Syncing users");
-    }
+    await APIProvider.getInstance().syncUsers();
+    props.handleSnackbarOpen("Syncing users");
   };
 
   return (

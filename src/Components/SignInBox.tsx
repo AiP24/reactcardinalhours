@@ -1,19 +1,9 @@
 import { LoadingButton } from "@mui/lab";
-import {
-  Button,
-  Checkbox,
-  FormControlLabel,
-  FormGroup,
-  Paper,
-  Snackbar,
-  styled,
-  TextField,
-  Typography,
-} from "@mui/material";
+import { Button, Checkbox, FormControlLabel, FormGroup, Paper, Snackbar, styled, TextField, Typography } from "@mui/material";
 import React, { ChangeEvent, useContext, useState } from "react";
-import DataAccess from "../api/DataAccess";
 import CustomTextField from "./CustomTextField";
 import { UsersContext } from "./DesktopComponent";
+import { APIProvider } from "../api/APIProvider";
 
 const styles = {
   container: {
@@ -58,41 +48,26 @@ const SignInBox = (props: SignInBoxProps): JSX.Element => {
   const [passwordText, setPasswordText] = useState<string>("");
   const [users, setUsers] = useContext(UsersContext);
 
-  const checkBox: JSX.Element = (
-    <Checkbox
-      checked={isShowPassword}
-      style={{ color: "#ff073a" }}
-      onChange={(
-        event: ChangeEvent<HTMLInputElement>,
-        checked: boolean
-      ): void => setIsShowPassword(checked)}
-    />
-  );
+  const checkBox: JSX.Element = <Checkbox checked={isShowPassword} style={{ color: "#ff073a" }} onChange={(event: ChangeEvent<HTMLInputElement>, checked: boolean): void => setIsShowPassword(checked)} />;
 
   const handleSignIn = async (password: string): Promise<void> => {
-    if (!passwordText.trim())
-      return props.handleSnackbarOpen("Please enter a non-empty password");
-    const user: User = await DataAccess.getInstance().get(
-      password,
-      props.handleSnackbarOpen
-    );
+    if (!passwordText.trim()) return props.handleSnackbarOpen("Please enter a non-empty password");
+    const user: User = (await APIProvider.getInstance().getUser(password)) as any as User;
     if (user.signedIn === 0) {
-      DataAccess.getInstance()
-        .signIn(password, user.name, props.handleSnackbarOpen)
-        .then((_) =>
-          DataAccess.getInstance()
-            .getAll()
-            .then((users) => setUsers(users))
-        );
+      APIProvider.getInstance()
+        .signInUser(password)
+        .then((_) => {
+          APIProvider.getInstance().getAllUsers().then(setUsers);
+          props.handleSnackbarOpen(`Signed in as ${user.name}`);
+        });
       //props.handleSnackbarOpen(`Signed in as ${user.name}`)
     } else if (user.signedIn === 1) {
-      DataAccess.getInstance()
-        .signOut(password, user.name, props.handleSnackbarOpen)
-        .then((_) =>
-          DataAccess.getInstance()
-            .getAll()
-            .then((users) => setUsers(users))
-        );
+      APIProvider.getInstance()
+        .signOutUser(password)
+        .then((_) => {
+          APIProvider.getInstance().getAllUsers().then(setUsers);
+          props.handleSnackbarOpen(`Signed out as ${user.name}`);
+        });
       //props.handleSnackbarOpen(`Signed out as ${user.name}`)
     }
     setPasswordText("");
@@ -104,25 +79,17 @@ const SignInBox = (props: SignInBoxProps): JSX.Element => {
       <CustomTextField
         label="Password"
         type={isShowPassword ? "text" : "password"}
-        onChange={(e: ChangeEvent<HTMLInputElement>) =>
-          setPasswordText(e.currentTarget.value)
-        }
+        onChange={(e: ChangeEvent<HTMLInputElement>) => setPasswordText(e.currentTarget.value)}
         value={passwordText}
         onKeyDown={(e: React.KeyboardEvent<HTMLDivElement>) => {
-          if (e.key === localStorage.getItem("submitKey") || e.key === "Enter")
-            handleSignIn(passwordText);
+          if (e.key === localStorage.getItem("submitKey") || e.key === "Enter") handleSignIn(passwordText);
         }}
       />
       <FormGroup sx={styles.checkBox}>
         <FormControlLabel label="Show Password" control={checkBox} />
       </FormGroup>
       {/*Need to use arrow func this time b/c of the enter key?*/}
-      <LoadingButton
-        onClick={() => handleSignIn(passwordText)}
-        size="large"
-        sx={styles.button}
-        variant="contained"
-      >
+      <LoadingButton onClick={() => handleSignIn(passwordText)} size="large" sx={styles.button} variant="contained">
         <Typography>Sign In</Typography>
       </LoadingButton>
     </Paper>

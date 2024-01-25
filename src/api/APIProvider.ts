@@ -44,6 +44,7 @@ export class APIProvider {
     if (!this.authProvider || this.authProvider!.isAuthenticated() == false) throw new AuthError("Authentication assertion failure!");
   }
 
+  // Do NOT use this directly - call AuthProvider#authenticate instead!
   async authenticate(password: string): Promise<APITypes.AuthResponse | never> {
     const response = await fetch(Routes.auth(), {
       method: "POST",
@@ -63,7 +64,7 @@ export class APIProvider {
   }
 
   @AuthRequired
-  public async syncData(): Promise<void | never> {
+  public async syncUsers(): Promise<void | never> {
     this._assertIsAuth();
     const response = await fetch(
       Routes.sync(),
@@ -104,7 +105,7 @@ export class APIProvider {
   }
 
   @AuthRequired
-  public async createUser(user: APITypes.APIUser): Promise<void | never> {
+  public async createUser(user: Pick<APITypes.APIUser, "first_name" | "last_name" | "password">): Promise<void | never> {
     this._assertIsAuth();
     const response = await fetch(
       Routes.createUser(),

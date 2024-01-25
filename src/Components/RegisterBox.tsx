@@ -1,11 +1,12 @@
 import { LoadingButton } from "@mui/lab";
 import { Paper, TextField, Typography } from "@mui/material";
 import React, { ChangeEvent, useContext, useState } from "react";
-import DataAccess from "../api/DataAccess";
 import CustomTextField from "./CustomTextField";
 import { UsersContext } from "./DesktopComponent";
 import AdminDialog from "./Notifications/AdminDialog";
 import { AdminDialogContext } from "./Right";
+import { APIProvider } from "../api/APIProvider";
+import AuthProvider from "../api/AuthProvider";
 
 const styles = {
   container: {
@@ -46,64 +47,35 @@ const RegisterBox = (props: RegisterBoxProps): JSX.Element => {
   const [user, setUsers] = useContext(UsersContext);
 
   const closeDialog = (password: string): void => {
-    if (
-      password !==
-      "Berdies" /*|| password !==localStorage.getItem("adminPassword")*/
-    ) {
-      console.log(password);
-      return props.handleSnackbarOpen("Invalid Password");
-    }
-    setDialogIsOpen(false);
+    const auth = AuthProvider.getInstance();
+    auth
+      .authenticate(password)
+      .then((_) => {
+        APIProvider.getInstance().setAuthProvider(auth);
+        setDialogIsOpen(false);
+      })
+      .catch((_) => props.handleSnackbarOpen("Invalid password"));
   };
 
-  const handleRegisterUser = (
-    firstName: string,
-    lastName: string,
-    password: string
-  ): void => {
-    if (dialogIsOpen)
-      return props.handleSnackbarOpen("Please enter the admin password");
-    if (!firstName.trim() || !lastName.trim() || !password.trim())
-      props.handleSnackbarOpen("No empty fields");
-    DataAccess.getInstance()
-      .save(firstName, lastName, password, props.handleSnackbarOpen)
-      .then((_) =>
-        DataAccess.getInstance()
-          .getAll()
-          .then((users) => setUsers(users))
-      );
+  const handleRegisterUser = (firstName: string, lastName: string, password: string): void => {
+    if (dialogIsOpen) return props.handleSnackbarOpen("Please enter the admin password");
+    if (!firstName.trim() || !lastName.trim() || !password.trim()) props.handleSnackbarOpen("No empty fields");
+    APIProvider.getInstance()
+      .createUser({
+        first_name: firstName,
+        last_name: lastName,
+        password,
+      })
+      .then((_) => APIProvider.getInstance().getAllUsers().then(setUsers));
   };
 
   return (
     <Paper sx={styles.container}>
       <Typography sx={styles.enterFieldsText}>Enter User Info</Typography>
-      <CustomTextField
-        onChange={(event: ChangeEvent<HTMLInputElement>) =>
-          setFirstName(event.currentTarget.value)
-        }
-        label="First Name"
-        sx={styles.textField}
-      />
-      <CustomTextField
-        onChange={(event: ChangeEvent<HTMLInputElement>) =>
-          setLastName(event.currentTarget.value)
-        }
-        label="Last Name"
-        sx={styles.textField}
-      />
-      <CustomTextField
-        onChange={(event: ChangeEvent<HTMLInputElement>) =>
-          setPassword(event.currentTarget.value)
-        }
-        label="Password"
-        sx={styles.textField}
-      />
-      <LoadingButton
-        onClick={() => handleRegisterUser(firstName, lastName, password)}
-        size="large"
-        variant="contained"
-        sx={styles.button}
-      >
+      <CustomTextField onChange={(event: ChangeEvent<HTMLInputElement>) => setFirstName(event.currentTarget.value)} label="First Name" sx={styles.textField} />
+      <CustomTextField onChange={(event: ChangeEvent<HTMLInputElement>) => setLastName(event.currentTarget.value)} label="Last Name" sx={styles.textField} />
+      <CustomTextField onChange={(event: ChangeEvent<HTMLInputElement>) => setPassword(event.currentTarget.value)} label="Password" sx={styles.textField} />
+      <LoadingButton onClick={() => handleRegisterUser(firstName, lastName, password)} size="large" variant="contained" sx={styles.button}>
         <Typography>Submit</Typography>
       </LoadingButton>
       <AdminDialog isOpen={dialogIsOpen} closeDialog={closeDialog} />
