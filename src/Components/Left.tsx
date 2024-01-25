@@ -1,6 +1,6 @@
 import { Typography } from "@mui/material"
 import { Box } from "@mui/system"
-import { CSSProperties, useContext, useEffect, useState } from "react"
+import { useContext, useEffect, useState } from "react"
 import { UsersContext } from "./DesktopComponent"
 import Searchbar from "./Searchbar"
 import UserCard from "./UserCard"

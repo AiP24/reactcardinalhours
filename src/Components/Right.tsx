@@ -1,11 +1,10 @@
-import { Button, Snackbar, Tab, TabsContext, TextField, Typography } from "@mui/material";
+import { Snackbar, Tab, Typography } from "@mui/material";
 import { Box } from "@mui/system"
-import { ChangeEvent, Context, createContext, SetStateAction, useEffect, useState } from "react";
+import { ChangeEvent, Context, createContext, useEffect, useState } from "react";
 import SignInBox from "./SignInBox";
 import {TabContext, TabList, TabPanel} from "@mui/lab";
 import RegisterBox from "./RegisterBox";
 import SettingsBox from "./SettingsBox";
-import AddSessionBox from "./AddSessionBox";
 import AddSessionBox2 from "./AddSessionBox2";
 
 const styles = {

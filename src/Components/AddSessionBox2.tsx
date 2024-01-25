@@ -1,17 +1,11 @@
 import React, { ChangeEvent, useState } from 'react'
-import {withStyles } from '@material-ui/core'
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import DateTimePicker from 'react-datetime-picker'
-import { Box, Button, TextField, Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import CustomTextField from './CustomTextField';
 
-const styles = (theme: any) => ({
-    snackBar: {
-        marginTop: '10%',
-    },
-})
 //This one is just a test on my part, pay no attention to it
 const mStyles = {
     container: {

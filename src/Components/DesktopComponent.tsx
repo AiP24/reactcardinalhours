@@ -4,7 +4,6 @@ import DataAccess from "../DataAccess";
 import Left from "./Left";
 import Right from "./Right";
 import '../App.css'
-import { Socket } from "dgram";
 
 const styles = {
     container: {

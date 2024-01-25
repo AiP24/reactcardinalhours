@@ -1,10 +1,6 @@
-import React from 'react';
-import logo from './logo.svg';
 import './App.css';
 import { Component } from 'react';
 import DesktopComponent from './Components/DesktopComponent';
-import DataAccess from './DataAccess';
-import MobileComponent from './Components/Mobile/MobileComponent';
 type AppProps = {
 
 }

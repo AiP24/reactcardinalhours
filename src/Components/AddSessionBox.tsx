@@ -1,15 +1,9 @@
 import React, { ChangeEvent, useState } from 'react'
-import {withStyles } from '@material-ui/core'
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import DateTimePicker from 'react-datetime-picker'
 import { Box } from '@mui/material';
 
-const styles = (theme: any) => ({
-    snackBar: {
-        marginTop: '10%',
-    }
-})
 //Copy and pasted from add_session_touch_up
 toast.configure()
 function AddSessionBox() {
